@@ -303,7 +303,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     /// @param r                  Order ECDSA signature parameters r.
     /// @param s                  Order ECDSA signature parameters s.
     function cancelOrder(
-        address[3] addresses,
+        address[4] addresses,
         uint[7]    orderValues,
         bool       buyNoMoreThanAmountB,
         uint8      marginSplitPercentage,
@@ -321,6 +321,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
             addresses[0],
             addresses[1],
             addresses[2],
+            addresses[3],
             orderValues[0],
             orderValues[1],
             orderValues[5],
@@ -392,7 +393,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
 
     function verifyTokensRegistered(
         uint          ringSize,
-        address[2][]  addressList
+        address[3][]  addressList
         )
         private
         view
@@ -400,7 +401,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
         // Extract the token addresses
         address[] memory tokens = new address[](ringSize);
         for (uint i = 0; i < ringSize; i++) {
-            tokens[i] = addressList[i][1];
+            tokens[i] = addressList[i][2];
         }
 
         // Test all token addresses at once
@@ -823,7 +824,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     /// @dev verify input data's basic integrity.
     function verifyInputDataIntegrity(
         uint          ringSize,
-        address[2][]  addressList,
+        address[3][]  addressList,
         uint[7][]     uintArgsList,
         uint8[2][]    uint8ArgsList,
         bool[]        buyNoMoreThanAmountBList,
@@ -852,7 +853,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     /// @dev        assmble order parameters into Order struct.
     /// @return     A list of orders.
     function assembleOrders(
-        address[2][]    addressList,
+        address[3][]    addressList,
         uint[7][]       uintArgsList,
         uint8[2][]      uint8ArgsList,
         bool[]          buyNoMoreThanAmountBList,
