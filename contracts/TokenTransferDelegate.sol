@@ -179,10 +179,7 @@ contract TokenTransferDelegate is Claimable {
         uint len = batch.length;
         require(len % 6 == 0);
 
-        ERC20 lrc = ERC20(lrcTokenAddress);
 
-        uint walletAmount = 0;
-        uint minerAmount = 0;
 
         for (uint i = 0; i < len; i += 6) {
             address owner = address(batch[i]);
@@ -200,45 +197,56 @@ contract TokenTransferDelegate is Claimable {
                 );
             }
 
-            if (owner != feeRecipient) {
-                walletAmount = uint(batch[i + 3]) * walletSplitPercentage / 100;
-                minerAmount = uint(batch[i + 3]) - walletAmount;
-
-                if (minerAmount != 0) {
-                    require(
-                        token.transferFrom(owner, feeRecipient, minerAmount)
-                    );
-                }
-
-                if (walletAmount != 0) {
-                    require(
-                        token.transferFrom(owner, walletAddresses[i], walletAmount)
-                    );
-                }
-
-                minerAmount = uint(batch[i + 4]) * (100 - walletSplitPercentage) / 100;
-
-                if (minerAmount != 0) {
-                    require(
-                        lrc.transferFrom(feeRecipient, owner, minerAmount)
-                    );
-                }
-
-                walletAmount = uint(batch[i + 4]) * walletSplitPercentage / 100;
-                minerAmount = uint(batch[i + 4]) - walletAmount;
-
-                if (minerAmount != 0) {
-                    require(
-                        lrc.transferFrom(owner, feeRecipient, minerAmount)
-                    );
-                }
-
-                if (walletAmount != 0) {
-                    require(
-                        lrc.transferFrom(walletAddresses[i], owner, walletAmount)
-                    );
-                }
-            }
+            transferFees(token,
+                         lrcTokenAddress,
+                         owner,
+                         feeRecipient,
+                         walletAddresses[i],
+                         walletSplitPercentage,
+                         uint(batch[i + 3]),
+                         uint(batch[i + 4]),
+                         uint(batch[i + 5])
+            );
         }
+    }
+
+    function transferFees(ERC20 token,
+                          address lrcTokenAddress,
+                          address owner,
+                          address minerFeeRecipient,
+                          address walletFeeRecipient,
+                          uint8 walletSplitPercentage,
+                          uint tokenSFeeAmount,
+                          uint lrcAwardAmount,
+                          uint lrcFeeAmount)
+        internal
+    {
+        uint walletAmount = tokenSFeeAmount * walletSplitPercentage / 100;
+        uint minerAmount = tokenSFeeAmount - walletAmount;
+        ERC20 lrc = ERC20(lrcTokenAddress);
+
+        if (minerAmount != 0 && owner != minerFeeRecipient) {
+            require(token.transferFrom(owner, minerFeeRecipient, minerAmount));
+        }
+
+        if (walletAmount != 0 && owner != walletFeeRecipient) {
+            require(token.transferFrom(owner, walletFeeRecipient, walletAmount));
+        }
+
+        minerAmount = lrcAwardAmount * (100 - walletSplitPercentage) / 100;
+        if (minerAmount != 0 && owner != minerFeeRecipient) {
+            require(lrc.transferFrom(minerFeeRecipient, owner, minerAmount));
+        }
+
+        walletAmount = lrcFeeAmount * walletSplitPercentage / 100;
+        minerAmount = lrcFeeAmount - walletAmount;
+        if (minerAmount != 0 && owner != minerFeeRecipient) {
+            require(lrc.transferFrom(owner, minerFeeRecipient, minerAmount));
+        }
+
+        if (walletAmount != 0 && owner != walletFeeRecipient) {
+            require(lrc.transferFrom(owner, walletFeeRecipient, walletAmount));
+        }
+
     }
 }
