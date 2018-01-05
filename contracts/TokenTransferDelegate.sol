@@ -170,6 +170,8 @@ contract TokenTransferDelegate is Claimable {
     function batchTransferToken(
         address lrcTokenAddress,
         address feeRecipient,
+        address[] walletAddresses,
+        uint8 walletSplitPercentage,
         bytes32[] batch)
         onlyAuthorized
         external
@@ -178,6 +180,9 @@ contract TokenTransferDelegate is Claimable {
         require(len % 6 == 0);
 
         ERC20 lrc = ERC20(lrcTokenAddress);
+
+        uint walletAmount = 0;
+        uint minerAmount = 0;
 
         for (uint i = 0; i < len; i += 6) {
             address owner = address(batch[i]);
@@ -196,24 +201,41 @@ contract TokenTransferDelegate is Claimable {
             }
 
             if (owner != feeRecipient) {
-                bytes32 item = batch[i + 3];
-                if (item != 0) {
+                walletAmount = uint(batch[i + 3]) * walletSplitPercentage / 100;
+                minerAmount = uint(batch[i + 3]) - walletAmount;
+
+                if (minerAmount != 0) {
                     require(
-                        token.transferFrom(owner, feeRecipient, uint(item))
+                        token.transferFrom(owner, feeRecipient, minerAmount)
                     );
                 }
 
-                item = batch[i + 4];
-                if (item != 0) {
+                if (walletAmount != 0) {
                     require(
-                        lrc.transferFrom(feeRecipient, owner, uint(item))
+                        token.transferFrom(owner, walletAddresses[i], walletAmount)
                     );
                 }
 
-                item = batch[i + 5];
-                if (item != 0) {
+                minerAmount = uint(batch[i + 4]) * (100 - walletSplitPercentage) / 100;
+
+                if (minerAmount != 0) {
                     require(
-                        lrc.transferFrom(owner, feeRecipient, uint(item))
+                        lrc.transferFrom(feeRecipient, owner, minerAmount)
+                    );
+                }
+
+                walletAmount = uint(batch[i + 4]) * walletSplitPercentage / 100;
+                minerAmount = uint(batch[i + 4]) - walletAmount;
+
+                if (minerAmount != 0) {
+                    require(
+                        lrc.transferFrom(owner, feeRecipient, minerAmount)
+                    );
+                }
+
+                if (walletAmount != 0) {
+                    require(
+                        lrc.transferFrom(walletAddresses[i], owner, walletAmount)
                     );
                 }
             }

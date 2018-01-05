@@ -158,6 +158,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
 
         require(_maxRingSize > 1);
         require(_rateRatioCVSThreshold > 0);
+        require(_walletSplitPercentage >= 0 && _walletSplitPercentage <= 100);
 
         lrcTokenAddress = _lrcTokenAddress;
         tokenRegistryAddress = _tokenRegistryAddress;
@@ -487,6 +488,8 @@ contract LoopringProtocolImpl is LoopringProtocol {
         uint[6][] memory amountsList)
     {
         bytes32[] memory batch = new bytes32[](ringSize * 6); // ringSize * (owner + tokenS + 4 amounts)
+        address[] memory walletAddresses = new address[](ringSize);
+
         orderHashList = new bytes32[](ringSize);
         amountsList = new uint[6][](ringSize);
 
@@ -496,6 +499,8 @@ contract LoopringProtocolImpl is LoopringProtocol {
             Order memory order = state.order;
             uint prevSplitB = orders[(i + ringSize - 1) % ringSize].splitB;
             uint nextFillAmountS = orders[(i + 1) % ringSize].fillAmountS;
+
+            walletAddresses[i] = order.wallet;
 
             // Store owner and tokenS of every order
             batch[p] = bytes32(order.owner);
@@ -525,7 +530,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
         }
 
         // Do all transactions
-        delegate.batchTransferToken(_lrcTokenAddress, feeRecipient, batch);
+        delegate.batchTransferToken(_lrcTokenAddress, feeRecipient, walletAddresses, walletSplitPercentage, batch);
     }
 
     /// @dev Verify miner has calculte the rates correctly.
