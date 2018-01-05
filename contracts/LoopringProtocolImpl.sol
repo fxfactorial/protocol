@@ -48,6 +48,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
 
     uint    public  maxRingSize                 = 0;
     uint64  public  ringIndex                   = 0;
+    uint8   public  walletSplitPercentage       = 0;
 
     // Exchange rate (rate) is the amount to sell or sold divided by the amount
     // to buy or bought.
@@ -99,6 +100,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     /// @param r            ECDSA signature parameters r.
     /// @param s            ECDSA signature parameters s.
     struct Order {
+        address wallet;
         address owner;
         address tokenS;
         address tokenB;
@@ -144,7 +146,8 @@ contract LoopringProtocolImpl is LoopringProtocol {
         address _ringhashRegistryAddress,
         address _delegateAddress,
         uint    _maxRingSize,
-        uint    _rateRatioCVSThreshold
+        uint    _rateRatioCVSThreshold,
+        uint8   _walletSplitPercentage
         )
         public
     {
@@ -162,6 +165,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
         delegateAddress = _delegateAddress;
         maxRingSize = _maxRingSize;
         rateRatioCVSThreshold = _rateRatioCVSThreshold;
+        walletSplitPercentage = _walletSplitPercentage;
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -202,7 +206,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     ///                     of fee selection model, LRC will also be sent from
     ///                     this address.
     function submitRing(
-        address[2][]  addressList,
+        address[3][]  addressList,
         uint[7][]     uintArgsList,
         uint8[2][]    uint8ArgsList,
         bool[]        buyNoMoreThanAmountBList,
@@ -869,6 +873,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
             Order memory order = Order(
                 addressList[i][0],
                 addressList[i][1],
+                addressList[i][2],
                 addressList[(i + 1) % ringSize][1],
                 uintArgs[0],
                 uintArgs[1],
@@ -923,17 +928,18 @@ contract LoopringProtocolImpl is LoopringProtocol {
         private
         view
     {
-        require(order.owner != 0x0); // "invalid order owner");
-        require(order.tokenS != 0x0); // "invalid order tokenS");
-        require(order.tokenB != 0x0); // "invalid order tokenB");
-        require(order.amountS != 0); // "invalid order amountS");
-        require(order.amountB != 0); // "invalid order amountB");
-        require(timestamp <= block.timestamp); // "order is too early to match");
-        require(timestamp > cutoffs[order.owner]); // "order is cut off");
-        require(ttl != 0); // "order ttl is 0");
-        require(timestamp + ttl > block.timestamp); // "order is expired");
-        require(salt != 0); // "invalid order salt");
-        require(order.marginSplitPercentage <= MARGIN_SPLIT_PERCENTAGE_BASE); // "invalid order marginSplitPercentage");
+        require(order.wallet != 0x0); // "invalid wallet address";
+        require(order.owner != 0x0); // "invalid order owner";
+        require(order.tokenS != 0x0); // "invalid order tokenS";
+        require(order.tokenB != 0x0); // "invalid order tokenB";
+        require(order.amountS != 0); // "invalid order amountS";
+        require(order.amountB != 0); // "invalid order amountB";
+        require(timestamp <= block.timestamp); // "order is too early to match";
+        require(timestamp > cutoffs[order.owner]); // "order is cut off";
+        require(ttl != 0); // "order ttl is 0";
+        require(timestamp + ttl > block.timestamp); // "order is expired";
+        require(salt != 0); // "invalid order salt";
+        require(order.marginSplitPercentage <= MARGIN_SPLIT_PERCENTAGE_BASE); // "invalid order marginSplitPercentage";
     }
 
     /// @dev Get the Keccak-256 hash of order with specified parameters.
@@ -949,6 +955,7 @@ contract LoopringProtocolImpl is LoopringProtocol {
     {
         return keccak256(
             address(this),
+            order.wallet,
             order.owner,
             order.tokenS,
             order.tokenB,
