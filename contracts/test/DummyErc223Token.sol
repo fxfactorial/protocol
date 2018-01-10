@@ -85,7 +85,7 @@ contract SafeMath {
 }
 
 
-contract ERC223Token is ERC223, SafeMath {
+contract DummyERC223Token is ERC223, SafeMath {
     mapping(address => uint) balances;
 
     string public name;
@@ -102,7 +102,7 @@ contract ERC223Token is ERC223, SafeMath {
     }
 
     /// @dev constructor
-    function ERC223Token(
+    function DummyERC223Token(
         string _name,
         string _symbol,
         uint8  _decimals,
