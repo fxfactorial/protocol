@@ -93,6 +93,48 @@ contract ERC223Token is ERC223, SafeMath {
     uint8 public decimals;
     uint256 public totalSupply;
 
+    address public owner;
+
+    /// @dev Throws if called by any account other than the owner.
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+
+    /// @dev constructor
+    function ERC223Token(
+        string _name,
+        string _symbol,
+        uint8  _decimals,
+        uint   _totalSupply
+        )
+        public
+    {
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
+        totalSupply = _totalSupply;
+        owner = msg.sender;
+        balances[msg.sender] = _totalSupply;
+    }
+
+    /// @dev set balance for any address. used for unit test.
+    function setBalance(
+        address _target,
+        uint _value
+        )
+        onlyOwner
+        public
+    {
+        uint currBalance = balanceOf(_target);
+        if (_value < currBalance) {
+            totalSupply = totalSupply - (currBalance - _value);
+        } else {
+            totalSupply = totalSupply + (_value - currBalance);
+        }
+        balances[_target] = _value;
+    }
+
     /// Function that is called when a user or another contract wants to transfer funds .
     function transfer(
         address _to,
