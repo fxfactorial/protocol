@@ -3,6 +3,7 @@ pragma solidity 0.4.18;
 import "zeppelin-solidity/contracts/token/MintableToken.sol";
 
 
+/// @dev Sample Erc20 token. used only for unit test.
 contract DummyToken is MintableToken {
     string public name;
     string public symbol;
