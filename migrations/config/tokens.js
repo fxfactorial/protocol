@@ -13,11 +13,6 @@ module.exports = {
     },
     {
       decimals: 18,
-      name: "Augur Reputation Token",
-      symbol: "REP",
-    },
-    {
-      decimals: 18,
       name: "NEO",
       symbol: "NEO",
     },

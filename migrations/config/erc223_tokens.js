@@ -11,11 +11,6 @@ module.exports = {
       name: "Erc223 Test B",
       symbol: "B",
     },
-    {
-      decimals: 18,
-      name: "Erc223 Test C",
-      symbol: "C",
-    },
   ],
 
   live: [ ],

@@ -39,7 +39,7 @@ module.exports = function(deployer, network, accounts) {
         totalSupply,
       )), _.noop).then(dummyErc223Tokens => {
         return Bluebird.each(dummyErc223Tokens.map((tokenContract, i) => {
-          var token = devTokenInfos[i];
+          var token = dummyErc223TokenInfos[i];
           return tokenRegistry.registerStandardToken(tokenContract.address, token.symbol, 1);
         }), _.noop);
       });

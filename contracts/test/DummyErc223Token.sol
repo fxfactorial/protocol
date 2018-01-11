@@ -95,6 +95,26 @@ contract DummyERC223Token is ERC223, SafeMath {
 
     address public owner;
 
+    /// Function to access name of token .
+    function name() constant returns (string) {
+        return name;
+    }
+
+    /// Function to access symbol of token .
+    function symbol() constant returns (string) {
+        return symbol;
+    }
+
+    /// Function to access decimals of token .
+    function decimals() constant returns (uint8) {
+        return decimals;
+    }
+
+    /// Function to access total supply of tokens .
+    function totalSupply() constant returns (uint256) {
+        return totalSupply;
+    }
+
     /// @dev Throws if called by any account other than the owner.
     modifier onlyOwner() {
         require(msg.sender == owner);
