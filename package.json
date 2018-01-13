@@ -7,11 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "transpile": "rm -rf ./transpiled; copyfiles ./build/**/* ./transpiled; ./node_modules/.bin/tsc",
-    "pretest": "./node_modules/.bin/solium --dir contracts; ./node_modules/.bin/tslint --project .",
+    "transpile":
+      "rm -rf ./transpiled; copyfiles ./build/**/* ./transpiled; ./node_modules/.bin/tsc",
+    "pretest":
+      "./node_modules/.bin/solium --dir contracts; ./node_modules/.bin/tslint --project .",
     "test": "npm run transpile; ./node_modules/.bin/truffle test",
-    "docker": "docker-compose up --build --abort-on-container-exit; docker-compose logs -f test",
-    "testdocker": "npm run transpile; ./node_modules/.bin/truffle test --network docker",
+    "docker":
+      "docker-compose up --build --abort-on-container-exit; docker-compose logs -f test",
+    "testdocker":
+      "npm run transpile; ./node_modules/.bin/truffle test --network docker",
     "compile": "rm -rf build/contracts; ./node_modules/.bin/truffle compile",
     "migrate": "npm run transpile; ./node_modules/.bin/truffle migrate",
     "deploy": "npm run migrate --network kovan",
@@ -29,7 +33,7 @@
     "ethereumjs-testrpc": "6.0.1",
     "truffle": "4.0.1",
     "solc": "0.4.18",
-    "solium": "^1.0.3",
+    "solium": "^1.0.4",
     "typescript": "2.4.2",
     "tslint": "5.8.0",
     "web3-typescript-typings": "0.0.3",
